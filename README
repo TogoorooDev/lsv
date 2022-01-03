@@ -7,3 +7,5 @@ lsv can stand for many things:
 feel free to make your own
 
 this program shows the files in a directory, in a similar style to "ls -l". It is not POSIX compliant and never will be. It has one flag, -a which displays hidden files. It has colors.
+
+some code comes from sbase by Suckless <https://core.suckless.org/sbase/>
