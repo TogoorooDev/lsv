@@ -85,6 +85,7 @@ int getclr(char *name){
     ".scm",
     ".o",
     ".out",
+    ".sh",
     (char *) NULL
   };
 
@@ -104,7 +105,6 @@ int getclr(char *name){
   //archives
 
   for (int i = 0; archiveexts[i] != NULL; i++){
-    //puts(archiveexts[i]);
     if (strcmp(extonly, archiveexts[i]) == 0) return RED;
   }
   
@@ -235,13 +235,29 @@ int printdir(char *name){
   sprintf(umode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[1], mode[2], mode[3]);
   sprintf(gmode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[4], mode[5], mode[6]);
   sprintf(amode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[7], mode[8], mode[9]);
-  
-  printf("\e[0;94m%c\e[0m%s%s%s\e[0m %s %s\t %s\n", mode[0], umode, gmode, amode, clrowner, calcspace(data.st_size), clrname);
 
+  char exspacing[2];
+
+  char sizechar[512];
+
+  sprintf(sizechar, "%ld", data.st_size);
+  
+  if (strlen(sizechar) <= 2){
+    exspacing[0] = '\t';
+    exspacing[1] = '\0';
+  }else {
+    exspacing[0] = '\0';
+  }
+  
+  
+  if (data.st_mode & S_IEXEC){
+    printf("\e[0;94m%c\e[0m%s%s%s\e[0m %s %s%s\t \e[3m%s\e[0m\n", mode[0], umode, gmode, amode, clrowner, calcspace(data.st_size), exspacing, clrname);
+  }else {
+    printf("\e[0;94m%c\e[0m%s%s%s\e[0m %s %s%s\t %s\n", mode[0], umode, gmode, amode, clrowner, calcspace(data.st_size), exspacing, clrname);
+  }
+    
   //printf("\e[0;94%c\e[0m %s %s\n", mode[0], clrowner, clrname);
 
-  
-  
   free(fullpath);
   free(clrname);
   free(clrowner);
@@ -284,14 +300,7 @@ int main(int argc, char *argv[]){
   }
 
   entries[count] = NULL;
-  
-  /* while((de = readdir(dirp)) != NULL){
-    if (de->d_name[0] != '.' || (hidden) && (strcmp(de->d_name, ".") != 0) && (strcmp(de->d_name, "..") != 0 )){
-      printdir(de->d_name);
-    }
 
-    }*/
- 
   qsort(entries, count, sizeof(char *), cmpfunc);
   
   for (int i = 0; entries[i] != NULL; i++){
@@ -300,8 +309,6 @@ int main(int argc, char *argv[]){
   
   closedir(dirp);
   free(path);
-  
-  printf("\n");
   
   return 0;
 }

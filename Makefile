@@ -5,6 +5,9 @@ OBJS = main.o
 lsv: main.o
 	$(CC) $(CFLAGS) main.o -o lsv
 
+install: lsv
+	cp lsv ~/.local/bin
+
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
 
