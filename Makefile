@@ -8,7 +8,7 @@ lsv: main.o
 install: lsv
 	cp lsv ~/.local/bin
 
-main.o: main.c
+main.o: main.c exts.h colors.h
 	$(CC) $(CFLAGS) -c main.c
 
 clean:

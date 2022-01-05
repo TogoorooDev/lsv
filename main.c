@@ -12,6 +12,7 @@
 #include <grp.h>
 
 #include "colors.h"
+#include "exts.h"
 
 int hidden;
 int longform;
@@ -45,71 +46,23 @@ int getclr(char *name){
   
   if (strchr(extonly, '.') != NULL) extonly = strchr(extonly, '.');
   
-  
-  char *archiveexts[] = {
-    ".zip",
-    ".gz",
-    ".bz2",
-    ".7z",
-    ".rar",
-    ".xz",
-    ".tar",
-    (char *) NULL
-    };
-
-  char *imgexts[] = {
-    ".png",
-    ".jpe",
-    ".jpg",
-    ".jpeg",
-    ".tiff",
-    ".gif",
-    ".bmp",
-    (char *) NULL
-    };
 
   char *special[] = {
     "",
     (char *) NULL,
   };
 
-  char *code[] = {
-    ".c",
-    ".cpp",
-    ".h",
-    ".hpp",
-    ".go",
-    ".rs",
-    ".mod",
-    ".lisp",
-    ".scm",
-    ".o",
-    ".out",
-    ".sh",
-    (char *) NULL
-  };
-
-  char *mediaexts[] = {
-    ".mp4",
-    ".ogg",
-    ".ogv",
-    ".mkv",
-    ".mp3",
-    ".aac",
-    ".flac",
-    (char *)NULL
-  };
   
   //puts(extonly);
 
   //archives
 
   for (int i = 0; archiveexts[i] != NULL; i++){
-    if (strcmp(extonly, archiveexts[i]) == 0) return RED;
+    if (strcmp(extonly, archiveexts[i]) == 0) return AR_EC;
   }
   
   for (int i = 0; imgexts[i] != NULL; i++){
-    if (strcmp(extonly, imgexts[i]) == 0) return CYAN;
+    if (strcmp(extonly, imgexts[i]) == 0) return IMG_EC;
   }
 
   for (int i = 0; special[i] != NULL; i++){
@@ -117,12 +70,17 @@ int getclr(char *name){
   }
 
   for (int i = 0; code[i] != NULL; i++){
-    if (strcmp(extonly, code[i]) == 0) return GREEN;
+    if (strcmp(extonly, code[i]) == 0) return CODE_EC;
   }
 
   for (int i = 0; mediaexts[i] != NULL; i++){
-    if (strcmp(extonly, code[i]) == 0) return MAGENTA;
+    if (strcmp(extonly, mediaexts[i]) == 0) return MD_EC;
   }
+
+  for (int i = 0; docexts[i] != NULL; i++){
+    if (strcmp(extonly, docexts[i]) == 0) return DOC_EC;
+  }
+
     
   return WHITE;
 }
@@ -242,7 +200,7 @@ int printdir(char *name){
 
   sprintf(sizechar, "%ld", data.st_size);
   
-  if (strlen(sizechar) <= 2){
+  if (strlen(sizechar) == 1){
     exspacing[0] = '\t';
     exspacing[1] = '\0';
   }else {
@@ -283,7 +241,7 @@ int main(int argc, char *argv[]){
   dirp = opendir(path);
 
   if (!dirp){
-    printf("Open Error");
+    puts("Open Error");
     return 1;
   }
 
