@@ -18,12 +18,6 @@ int hidden;
 int longform;
 char *path;
 
-inline int getlen(){
-  struct winsize sz;
-  ioctl(0, TIOCGWINSZ, &sz);
-  return sz.ws_col;
-}
-
 void args(int argc, char *argv[]){
   hidden = 0;
   
@@ -72,7 +66,7 @@ int getclr(char *name){
   for (int i = 0; code[i] != NULL; i++){
     if (strcmp(extonly, code[i]) == 0) return CODE_EC;
   }
-
+  
   for (int i = 0; mediaexts[i] != NULL; i++){
     if (strcmp(extonly, mediaexts[i]) == 0) return MD_EC;
   }
@@ -117,7 +111,7 @@ char *calcspace(int size){
 
 int printdir(char *name){
   struct stat data;
-  char *fullpath = malloc(2048);
+  char fullpath[2048];
   struct passwd *uinfo;
   struct group *ginfo;
   
@@ -130,21 +124,11 @@ int printdir(char *name){
   sprintf(fullpath, "%s/%s", path, name);
 
   if (stat(fullpath, &data) != 0) {
-    // \e[41m -> red background
-    // \e[6;37m -> blinking white text
-    // \e[0m -> reset
     sprintf(clrname, "\e[41m\e[6;37m%s\e[0m\n", name);
-    free(fullpath);
+
     return 0;
   }
   
-  if (S_ISDIR(data.st_mode)){
-    clr = BLUE;
-  }else {
-    clr = getclr(name);
-  }
-
-  sprintf(clrname, "\e[0;3%dm%s\e[0m", clr, name);
 
   uinfo = getpwuid(data.st_uid);
   ginfo = getgrgid(data.st_gid);
@@ -190,6 +174,17 @@ int printdir(char *name){
   if (data.st_mode & S_ISGID) mode[6] = (mode[6] == 'x') ? 's' : 'S';
   if (data.st_mode & S_ISVTX) mode[9] = (mode[9] == 'x') ? 't' : 'T';
 
+  
+  if (S_ISDIR(data.st_mode)){
+    clr = BLUE;
+  }else {
+    clr = getclr(name);
+  }
+
+  if (mode[3] == 'x' && !(S_ISDIR(data.st_mode))) sprintf(clrname, "\e[3;3%dm%s\e[0m", clr, name);
+  else if (S_ISDIR(data.st_mode)) sprintf(clrname, "\e[0;4%dm%s\e[0", clr, name);
+  else sprintf(clrname, "\e[0;3%dm%s\e[0m", clr, name);
+  
   sprintf(umode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[1], mode[2], mode[3]);
   sprintf(gmode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[4], mode[5], mode[6]);
   sprintf(amode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[7], mode[8], mode[9]);
@@ -209,16 +204,11 @@ int printdir(char *name){
   
   
   if (data.st_mode & S_IEXEC){
-    printf("\e[0;94m%c\e[0m%s%s%s\e[0m %s %s%s\t \e[3m%s\e[0m\n", mode[0], umode, gmode, amode, clrowner, calcspace(data.st_size), exspacing, clrname);
+    printf("\e[0;94m%c\e[0m%s%s%s\e[0m %s %s%s\t %s\n", mode[0], umode, gmode, amode, clrowner, calcspace(data.st_size), exspacing, clrname);
   }else {
     printf("\e[0;94m%c\e[0m%s%s%s\e[0m %s %s%s\t %s\n", mode[0], umode, gmode, amode, clrowner, calcspace(data.st_size), exspacing, clrname);
   }
     
-  //printf("\e[0;94%c\e[0m %s %s\n", mode[0], clrowner, clrname);
-
-  free(fullpath);
-  free(clrname);
-  free(clrowner);
   return 0;
 }
 
@@ -266,7 +256,6 @@ int main(int argc, char *argv[]){
   }
   
   closedir(dirp);
-  free(path);
   
   return 0;
 }
