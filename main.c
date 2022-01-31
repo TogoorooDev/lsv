@@ -29,8 +29,8 @@ void args(int argc, char *argv[]){
 int getclr(char *name){
   // search for ext
   char *extonly = name;
-
-  extonly = (strchr(extonly, '.'));
+  
+  extonly = (strrchr(extonly, '.'));
   if (extonly == NULL) return WHITE;
   
   //while (strchr(extonly, '.') != NULL) extonly = strchr(extonly, '.');
@@ -38,29 +38,12 @@ int getclr(char *name){
     extonly[i] = tolower(extonly[i]);
   }
   
-  if (strchr(extonly, '.') != NULL) extonly = strchr(extonly, '.');
-  
-
-  char *special[] = {
-    "",
-    (char *) NULL,
-  };
-
-  
-  //puts(extonly);
-
-  //archives
-
   for (int i = 0; archiveexts[i] != NULL; i++){
     if (strcmp(extonly, archiveexts[i]) == 0) return AR_EC;
   }
   
   for (int i = 0; imgexts[i] != NULL; i++){
     if (strcmp(extonly, imgexts[i]) == 0) return IMG_EC;
-  }
-
-  for (int i = 0; special[i] != NULL; i++){
-    if (strcmp(extonly, special[i]) == 0) return RED;
   }
 
   for (int i = 0; code[i] != NULL; i++){
@@ -75,7 +58,6 @@ int getclr(char *name){
     if (strcmp(extonly, docexts[i]) == 0) return DOC_EC;
   }
 
-    
   return WHITE;
 }
 
@@ -182,7 +164,7 @@ int printdir(char *name){
   }
 
   if (mode[3] == 'x' && !(S_ISDIR(data.st_mode))) sprintf(clrname, "\e[3;3%dm%s\e[0m", clr, name);
-  else if (S_ISDIR(data.st_mode)) sprintf(clrname, "\e[0;4%dm%s\e[0", clr, name);
+  else if (S_ISDIR(data.st_mode)) sprintf(clrname, "\e[0;4%dm%s\e[0m", clr, name);
   else sprintf(clrname, "\e[0;3%dm%s\e[0m", clr, name);
   
   sprintf(umode, "\e[0;96m%c\e[0;91m%c\e[0;92m%c", mode[1], mode[2], mode[3]);
@@ -256,6 +238,7 @@ int main(int argc, char *argv[]){
   }
   
   closedir(dirp);
+  free(path);
   
   return 0;
 }
