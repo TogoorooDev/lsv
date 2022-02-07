@@ -18,11 +18,17 @@ int hidden;
 int longform;
 char *path;
 
+enum {
+  BYTESPERG=1073742000,
+  BYTESPERM=1048576,
+  BYTESPERK=1024
+};
+
 void args(int argc, char *argv[]){
   hidden = 0;
   
   for (unsigned short i = 0; i < argc; i++){
-    if (strcmp(argv[i], "-a") == 0) hidden = 1;
+    if (strncmp(argv[i], "-a", 2) == 0) hidden = 1;
   }
 }
 
@@ -39,23 +45,23 @@ int getclr(char *name){
   }
   
   for (int i = 0; archiveexts[i] != NULL; i++){
-    if (strcmp(extonly, archiveexts[i]) == 0) return AR_EC;
+    if (strncmp(extonly, archiveexts[i], PATH_MAX) == 0) return AR_EC;
   }
   
   for (int i = 0; imgexts[i] != NULL; i++){
-    if (strcmp(extonly, imgexts[i]) == 0) return IMG_EC;
+    if (strncmp(extonly, imgexts[i], PATH_MAX) == 0) return IMG_EC;
   }
 
   for (int i = 0; code[i] != NULL; i++){
-    if (strcmp(extonly, code[i]) == 0) return CODE_EC;
+    if (strncmp(extonly, code[i], PATH_MAX) == 0) return CODE_EC;
   }
   
   for (int i = 0; mediaexts[i] != NULL; i++){
-    if (strcmp(extonly, mediaexts[i]) == 0) return MD_EC;
+    if (strncmp(extonly, mediaexts[i], PATH_MAX) == 0) return MD_EC;
   }
 
   for (int i = 0; docexts[i] != NULL; i++){
-    if (strcmp(extonly, docexts[i]) == 0) return DOC_EC;
+    if (strncmp(extonly, docexts[i], PATH_MAX) == 0) return DOC_EC;
   }
 
   return WHITE;
@@ -93,9 +99,12 @@ char *calcspace(int size){
 
 int printdir(char *name){
   struct stat data;
-  char fullpath[2048];
+  char fullpath[PATH_MAX];
   struct passwd *uinfo;
   struct group *ginfo;
+  char umode[48];
+  char gmode[48];
+  char amode[48];
   
   //colors
   char *clrname = malloc(512);
@@ -118,10 +127,6 @@ int printdir(char *name){
   //printf("%s %s", uinfo->pw_name, ginfo->gr_name);
 
   sprintf(clrowner, "\e[0;3%dm%s %s\e[0m", YELLOW, uinfo->pw_name, ginfo->gr_name);
-  
-  char umode[48];
-  char gmode[48];
-  char amode[48];
   
   char mode[] = "----------";
 	
@@ -198,7 +203,7 @@ int cmpfunc(const void *a, const void *b){
   const char *ia = *(const char **)a;
   const char *ib = *(const char **)b;
   
-  return strcmp(ia, ib);
+  return strncmp(ia, ib, PATH_MAX);
 }
 
 int main(int argc, char *argv[]){
@@ -220,7 +225,7 @@ int main(int argc, char *argv[]){
   int count = 0;
   
   while ((de = readdir(dirp)) != NULL){
-    if ((de->d_name[0] != '.') || ((hidden) && (strcmp(de->d_name, ".") != 0) && (strcmp(de->d_name, "..") != 0 ))){
+    if ((de->d_name[0] != '.') || ((hidden) && (strncmp(de->d_name, ".", PATH_MAX) != 0) && (strncmp(de->d_name, "..", PATH_MAX) != 0 ))){
       char *name = de->d_name;
       entries[count] = malloc(512);
       entries[count] = name;
