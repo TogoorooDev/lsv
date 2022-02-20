@@ -207,7 +207,7 @@ int cmpfunc(const void *a, const void *b){
 }
 
 int main(int argc, char *argv[]){
-  path = malloc(2048);
+  path = malloc(PATH_MAX);
   char *entries[4096];
   DIR *dirp;
   struct dirent *de;
